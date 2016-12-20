@@ -41,7 +41,7 @@
       shell: 'semanage port -a -t mongod_port_t -p tcp {{ mongodb_port }}'
       when: port_policy|failed
   when: (ansible_os_family == "RedHat" and ansible_selinux|default(omit) == True) or
-        (ansible_os_family == "RedHat" and ansible_selinux['mode']|default(omit) != "disabled" and ansible_selinux['status'] == 'enabled')
+        (ansible_os_family == "RedHat" and ansible_selinux['mode']|default(omit) != "disabled" and ansible_selinux['status']|default(omit) == 'enabled')
   tags:
     - mongodb_set-selinux-permissions
 
