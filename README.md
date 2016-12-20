@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/adamham/mongodb.svg?branch=master)](https://travis-ci.org/adamham/mongodb)
+
 mongodb
 =========
 
