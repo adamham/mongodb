@@ -1,0 +1,3 @@
+mongodb_user: 'mongod'
+mongodb_group: 'mongod'
+mongodb_pid: '/var/run/mongodb/mongod.pid'

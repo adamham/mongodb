@@ -1,0 +1,19 @@
+- name: yum | install mongodb repo
+  yum_repository:
+    baseurl: 'https://repo.mongodb.org/yum/redhat/7/mongodb-org/{{ mongodb_version }}/x86_64/'
+    state: present
+    description: 'MongoDB {{ mongodb_version }} repository'
+    name: 'MongoDB-{{ mongodb_version }}'
+    gpgcheck: yes
+    gpgkey: 'https://www.mongodb.org/static/pgp/server-{{ mongodb_version }}.asc'
+    enabled: yes
+  tags:
+    - mongodb_yum-install-packages
+
+- name: yum | install mondogb packages
+  yum:
+    name: mongodb-org
+    state: present
+    update_cache: yes
+  tags:
+    - mongodb_yum-install-packages

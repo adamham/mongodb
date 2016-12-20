@@ -1,0 +1,27 @@
+
+systemLog:
+  path: {{ mongodb_log_path }}/mongod.log
+  destination: file
+  logAppend: true
+processManagement:
+  fork: true
+  pidFilePath: {{ mongodb_pid }}
+net:
+  bindIp: "{{ mongodb_interfaces | join(',') }}"
+  port: "{{ mongodb_port }}"
+security:
+  authorization: {{ mongodb_authorization }}
+storage:
+  dbPath: {{ mongodb_db_path }}
+  journal:
+    enabled: true
+  engine: wiredTiger
+  wiredTiger:
+    engineConfig:
+      statisticsLogDelaySecs: 30
+operationProfiling:
+  mode: slowOp
+{% if mongo_replication_set -%}
+replication:
+  replSetName: "{{mongo_replication_set}}"
+{%- endif %}

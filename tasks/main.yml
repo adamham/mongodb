@@ -1,0 +1,54 @@
+---
+
+- block:
+    - include: apt-packages.yml
+    - include_vars: Debian.yml
+  when: ansible_distribution == "Debian" or ansible_distribution == "Ubuntu"
+
+- block:
+    - include: yum-packages.yml
+    - include_vars: RedHat.yml
+  when: ansible_os_family == "RedHat"
+
+- name: create storage path
+  file:
+    path: '{{ mongodb_db_path }}'
+    state: directory
+    owner: '{{ mongodb_user }}'
+    group: '{{ mongodb_group }}'
+    mode:
+  tags:
+    - mongodb_create-storage-path
+
+- block:
+    - name: install semanage
+      yum:
+        name: policycoreutils-python
+        state: present
+    - name: set selinux directory policy
+      shell: 'chcon -R -u system_u -r object_r -t mongod_var_lib_t -l s0 {{ mongodb_storage_path }}'
+      changed_when: false
+    - name: check selinux policy file exists
+      stat:
+        path: /etc/selinux/targeted/active/ports.local
+      register: ports
+    - name: check port policy
+      shell: 'grep -qq {{ mongodb_port }} /etc/selinux/targeted/active/ports.local'
+      register: port_policy
+      changed_when: false
+      when: ports.stat.exists
+    - name: set selinux port policy
+      shell: 'semanage port -a -t mongod_port_t -p tcp {{ mongodb_port }}'
+      when: port_policy|failed
+  when: ansible_os_family == "RedHat" and ansible_selinux['mode'] != "disabled" and ansible_selinux['status'] == 'enabled'
+  tags:
+    - mongodb_set-selinux-permissions
+
+- name: set mongodb config
+  template:
+    src: mongod.conf.j2
+    dest: /etc/mongod.conf
+  notify:
+    - restart mongodb
+  tags:
+    - mongodb_write-configuration
